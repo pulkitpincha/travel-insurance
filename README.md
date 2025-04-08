@@ -1,5 +1,7 @@
 # travel-insurance
 
+Dataset: https://www.kaggle.com/datasets/tejashvi14/travel-insurance-prediction-data
+
 ## Predicting Travel Insurance Purchases
 
 This dataset contains past data on the factors that are involved in a customer’s likelihood of 
@@ -30,7 +32,7 @@ least 4 different instances in the last 2 years [2017-2019].
 • Ever Travelled Abroad- Has the customer ever travelled to a foreign country [Not 
 Necessarily Using the Company's Services]
 
-# The dependent variable is the travel insurance. The goal is to find out if we can predict if a 
+**The dependent variable is the travel insurance.** The goal is to find out if we can predict if a 
 customer is likely to purchase the travel insurance based from the independent variables.
 
 ## Research Question:
