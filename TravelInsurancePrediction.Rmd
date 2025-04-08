@@ -1,0 +1,113 @@
+---
+title: "travel"
+author: "Pulkit Pincha"
+date: "2023-04-11"
+output: html_document
+---
+
+```{r importing packages}
+library(Ecdat)
+library(ggplot2)
+library(GGally)
+library(dplyr)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(car)
+library(Metrics)
+```
+
+```{r importing dataset}
+library(readxl)
+insurance <- read_excel("C:/Users/stimp/OneDrive/Desktop/Flame/DATA/project/TravelInsurancePrediction.xlsx")
+View(insurance)
+```
+
+```{r mutating variables}
+insurance = insurance %>% mutate(GraduateDummy = ifelse(GraduateOrNot == "Yes",1,0))
+
+insurance = insurance %>% mutate(FlyDummy = ifelse(FrequentFlyer == "Yes",1,0))
+
+insurance = insurance %>% mutate(AbroadDummy = ifelse(EverTravelledAbroad == "Yes",1,0))
+
+insurance = insurance %>% mutate(EmploymentDummy = ifelse(EmploymentType == "Government Sector",1,0))
+```
+
+```{r models}
+#linear regression model
+model <- lm( TravelInsurance ~ Age + AnnualIncome + FamilyMembers + ChronicDiseases + GraduateDummy + FlyDummy + AbroadDummy + EmploymentDummy, data = insurance)
+summary(model)
+summary(model)$coefficient
+vif(model)
+
+model1 <- lm( TravelInsurance ~ Age + AnnualIncome + FamilyMembers + FlyDummy + AbroadDummy, data = insurance)
+summary(model1)
+prediction1 = predict(model1, insurance)
+prediction1 <- round(prediction1)
+summary(model1)
+summary(model1)$coefficient
+vif(model1)
+
+#Decision tree model
+treemodel1 <- rpart(TravelInsurance ~ Age + AnnualIncome + FamilyMembers + ChronicDiseases + GraduateDummy + FlyDummy + AbroadDummy + EmploymentDummy, data = insurance, method = "class", minsplit = 2)
+rpart.plot(treemodel1)
+prediction2 = predict(treemodel1, insurance, type = "class")
+confusionMatrix(factor(prediction2), factor(insurance$TravelInsurance), mode = "prec_recall")
+```
+
+```{r split into train and test}
+set.seed(123)
+train_test_partitions <- createDataPartition(insurance$TravelInsurance, p = 0.8, list = FALSE)
+train  <- insurance[train_test_partitions, ]
+test <- insurance[-train_test_partitions, ]
+```
+
+```{r models w trainset}
+#linear regression model
+model2 = lm(TravelInsurance ~ Age + AnnualIncome + FamilyMembers + ChronicDiseases + GraduateDummy + FlyDummy + AbroadDummy + EmploymentDummy, data = train)
+summary(model2)
+summary(model2)$coefficient
+vif(model2)
+prediction3 = predict(model2, test)
+prediction3 <- round(prediction3)
+par(mfrow=c(2,2))
+plot(model2)
+```
+
+```{r making variables factors}
+train$Age = as.factor(train$Age)
+train$EmploymentType = as.factor(train$EmploymentType)
+train$GraduateOrNot = as.factor(train$GraduateOrNot)
+train$AnnualIncome = as.factor(train$AnnualIncome)
+train$FamilyMembers = as.factor(train$FamilyMembers)
+train$ChronicDiseases = as.factor(train$ChronicDiseases)
+train$FrequentFlyer = as.factor(train$FrequentFlyer)
+train$EverTravelledAbroad = as.factor(train$EverTravelledAbroad)
+train$TravelInsurance = as.factor(train$TravelInsurance)
+train$GraduateDummy = as.factor(train$GraduateDummy)
+train$FlyDummy = as.factor(train$FlyDummy)
+train$AbroadDummy = as.factor(train$AbroadDummy)
+train$EmploymentDummy = as.factor(train$EmploymentDummy)
+
+test$Age = as.factor(test$Age)
+test$EmploymentType = as.factor(test$EmploymentType)
+test$GraduateOrNot = as.factor(test$GraduateOrNot)
+test$AnnualIncome = as.factor(test$AnnualIncome)
+test$FamilyMembers = as.factor(test$FamilyMembers)
+test$ChronicDiseases = as.factor(test$ChronicDiseases)
+test$FrequentFlyer = as.factor(test$FrequentFlyer)
+test$EverTravelledAbroad = as.factor(test$EverTravelledAbroad)
+test$TravelInsurance = as.factor(test$TravelInsurance)
+test$GraduateDummy = as.factor(test$GraduateDummy)
+test$FlyDummy = as.factor(test$FlyDummy)
+test$AbroadDummy = as.factor(test$AbroadDummy)
+test$EmploymentDummy = as.factor(test$EmploymentDummy)
+```
+
+```{r model}
+#Decision tree model
+treemodel2 <- rpart(TravelInsurance ~ Age + AnnualIncome + FamilyMembers + ChronicDiseases + GraduateDummy + FlyDummy + AbroadDummy + EmploymentDummy, data = train, method = "class", minsplit = 2)
+rpart.plot(treemodel2)
+prediction4 = predict(treemodel2, test, method = "class")
+#confusionMatrix(prediction4, test$TravelInsurance) | Error in confusionMatrix: matrix must have equal dimensions
+```
